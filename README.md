@@ -6,8 +6,9 @@ This repository contains the source code accompanying the paper
 It includes implementations of the **Rounding the Expected Graph Algorithm (REGA)** and our proposed **Greedy with Maximal Independent Set (MIS)** heuristic.  
 All experiments were conducted on **Ubuntu** using **Python 3.12**.
 
-## 📁 Project Structure
+## Project Structure
 
+```text
 ├── heuristics/
 │ └── # Implementations of heuristic algorithms
 ├── /results
@@ -16,8 +17,9 @@ All experiments were conducted on **Ubuntu** using **Python 3.12**.
 ├── uniform_benchmark.py                   # Python code for benchmark comparison on uniform probability setting
 ├── requirements.txt                       # Python dependencies
 ├── README.md                              
+```
 
-## ⚙️ Setup
+## Setup
 
 To use the code, first clone the repository:
 ```bash
@@ -48,7 +50,7 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-## 🚀 Running the Experiments
+## Running the Experiments
 
 The repository provides two benchmark scripts corresponding to the edge probability settings used in the paper:
 
