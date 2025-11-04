@@ -1,56 +1,88 @@
-Stochastic Critical Node Detection Problem (SCNDP)
+# A Maximal Independent Set Heuristic for the Stochastic Critical Node Detection Problem
 
-This repository contains implementations and experiments for solving the Stochastic Critical Node Detection Problem (SCNDP), including heuristic, metaheuristic, and learning-based approaches.
+This repository contains the source code accompanying the paper  
+**“A Maximal Independent Set Heuristic for the Stochastic Critical Node Detection Problem.”**
 
-1. Setup
+It includes implementations of the **Rounding the Expected Graph Algorithm (REGA)** and our proposed **Greedy with Maximal Independent Set (MIS)** heuristic.  
+All experiments were conducted on **Ubuntu** using **Python 3.12**.
 
-Create a virtual environment
+## 📁 Project Structure
 
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\\Scripts\\activate
+├── heuristics/
+│ └── # Implementations of heuristic algorithms
+├── /results
+│ └── # Contains plots and CSV files of experimental results
+├── heterogeneous_benchmark.py             # Python code for benchmark comparison on heterogeneous probability setting
+├── uniform_benchmark.py                   # Python code for benchmark comparison on uniform probability setting
+├── requirements.txt                       # Python dependencies
+├── README.md                              
 
-Install required packages
+## ⚙️ Setup
 
-pip install --upgrade pip
+To use the code, first clone the repository:
+```bash
+git clone https://github.com/tuguldur102/StochasticCNDP.git
+```
+
+Create a virtual environment (recommended):
+```bash
+python -m venv env
+```
+
+To activate the virtual environment
+
+On Windows:
+```bash
+venv\\Scripts\\activate
+```
+
+or 
+
+on Ubuntu:
+```bash
+source venv/bin/activate
+```
+
+Install the dependencies:
+```bash
 pip install -r requirements.txt
+```
 
-Project structure
+## 🚀 Running the Experiments
 
-├── conference/
-                # Implementation of My Thai et al. paper
-                # MIS-based greedy heuristic code
-                # ES-based greedy heuristic code
-                # Parallel and optimized versions
-|
-├── extension/
-│   ├── heuristics/                     # REGA algorithm details and scratch 
-│   ├── learning/                     # learning-based algorithm details and 
-|
-├── requirements.txt              # Python dependencies
-├── README.md                     # This file
+The repository provides two benchmark scripts corresponding to the edge probability settings used in the paper:
 
-2. Detailed Folder Descriptions
+- Uniform probability setting:
+```bash
+python uniform_benchmark.py
+```
 
-2.1 conference/
+- Heterogeneous probability setting:
+```bash
+python heterogeneous_benchmark.py
+```
 
-my_thai_paper/: Reproduces the algorithm from My Thai et al. (2015) paper, including theoretical background and experimental validation.
+Each script performs benchmark comparisons on 100-node graphs with a deletion budget K = 10.
+After execution, results are automatically saved as CSV files in the project root directory.
 
-greedy_mis/: Implements a greedy strategy based on Maximum Independent Set (MIS) formulations.
+## Question/Need Support?
+If you have any questions or encounter issues, please open an issue. We’ll do our best to help.
 
-greedy_es/: Implements a greedy heuristic using Expected Surviving connectivity (ES) criteria.
+## Citation
+If you use this repository in your research, please cite the following paper:
 
-parallelized/: Optimized and parallelized versions of the above heuristics, utilizing multiprocessing and efficient data structures (e.g., CSR format).
+```bibtex
+@inproceedings{Bayarsaikhan2025,
+  author    = {Tuguldur Bayarsaikhan and Altannar Chinchuluun and Ashwin Arulselvan},
+  title     = {A Maximal Independent Set Heuristic for the Stochastic Critical Node Detection Problem},
+  booktitle = {Proceedings of the 19th International Conference on Algorithmic Aspects in Information and Management (AAIM 2025)},
+  address   = {Ulaanbaatar, Mongolia},
+  pages     = {accepted},
+  year      = {2025},
+  publisher = {Lecture Notes in Computer Science, Springer},
+}
+```
 
-Each subfolder includes:
+## License
 
-Source code (*.py files)
-
-Example usage scripts (run_*.sh or Jupyter notebooks)
-
-2.2 extension/
-
-rega/: From-scratch implementation of the REGA algorithm, with parameter tuning and detailed comments.
-
-grasp/: Greedy Randomized Adaptive Search Procedure (GRASP) implementation, including reactive alpha and path-relinking extensions.
-
-learning/: Learning-based pipelines combining Graph Neural Networks (GNNs) for encoding uncertainty and Reinforcement Learning (RL) decoders for node selection. Contains training scripts, model checkpoints, and evaluation routines.
+MIT License

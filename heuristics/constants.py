@@ -19,16 +19,6 @@ graph_models = {
   'SW': nx.watts_strogatz_graph(NODES, 4, 0.3, seed=SEED)
 }
 
-# DENSE_NODES = 50 
-# K = 5
-# # nodes 50, p = 0.5 (Dense Graphs) 2500 edges
-
-# graph_models_dense = {
-#   'ER': nx.erdos_renyi_graph(DENSE_NODES, 0.5025, seed=SEED),
-#   'BA': nx.barabasi_albert_graph(DENSE_NODES, 25,seed=SEED),
-#   'SW': nx.watts_strogatz_graph(DENSE_NODES, 25, 0.3, seed=SEED)
-# }
-
 dist_funcs = {
   'uniform': lambda: np.random.uniform(0.0, 1.0),
   'normal': lambda: np.clip(np.random.normal(0.5, 0.2), 0, 1),

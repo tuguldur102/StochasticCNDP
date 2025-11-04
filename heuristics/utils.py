@@ -8,37 +8,38 @@ import math
 from itertools import combinations, product
 
 def sigma_exact(
-    G: nx.Graph,
-    S: set,
-) -> int:
-    
-    edges = list(G.edges())
-    total_conn = 0.0
+  G: nx.Graph,
+  S: set,
+  ) -> int:
+  """
+    Exact EPC evaluation by considering every pairwise connections.
+  """
+  edges = list(G.edges())
+  total_conn = 0.0
 
-    for state in product([0,1], repeat=len(edges)):
-        p_state = 1
-        Gp = nx.Graph()
-        Gp.add_nodes_from(set(G.nodes())-S)
+  for state in product([0,1], repeat=len(edges)):
+    p_state = 1
+    Gp = nx.Graph()
+    Gp.add_nodes_from(set(G.nodes())-S)
 
-        for (e, keep) in zip(edges, state):
-            p_edge = G.edges[e]['p']
-            p_state *= (p_edge if keep else (1-p_edge))
+    for (e, keep) in zip(edges, state):
+      p_edge = G.edges[e]['p']
+      p_state *= (p_edge if keep else (1-p_edge))
 
-            if keep and e[0] not in S and e[1] not in S:
-                Gp.add_edge(*e)
+      if keep and e[0] not in S and e[1] not in S:
+        Gp.add_edge(*e)
 
-        # count connected i<j pairs in Gp−S
-        for i,j in combinations(set(G.nodes())-S, 2):
-            if nx.has_path(Gp, i, j):
-                total_conn += p_state
+    for i,j in combinations(set(G.nodes())-S, 2):
+      if nx.has_path(Gp, i, j):
+        total_conn += p_state
 
-    return total_conn
+  return total_conn
 
 def component_sampling_epc_mc(G, S, num_samples=10_000,
                               epsilon=None, delta=None, use_tqdm=False):
   """
-  Theoretic bounds: compute N = N(epsilon, delta) by the theoretical bound.
-  Experimentation:  Otherwise, use the N as input for sample count.
+    Theoretic bounds: compute N = N(epsilon, delta) by the theoretical bound.
+    Experimentation:  Otherwise, use the N as input for sample count.
   """
 
   # Surviving vertex set and its size
@@ -92,7 +93,9 @@ def local_search(
   S_init: set,
   num_samples: int = 10_000
 ):
-  """1-swap local search from REGA papaer"""
+  """
+    1-swap local search from REGA implementation.
+  """
 
   S = S_init.copy()
   nodes_not_in_set = set(G.nodes()) - S
@@ -127,25 +130,27 @@ def local_search(
   return S
   
 def nx_to_csr(
-    G: nx.Graph
-    ) -> Tuple[List[int], Dict[int, int], np.ndarray, np.ndarray, np.ndarray]:
+  G: nx.Graph
+  ) -> Tuple[List[int], Dict[int, int], np.ndarray, np.ndarray, np.ndarray]:
 
-    """Convert an undirected graph to CSR arrays."""
+  """
+    Convert an undirected graph to CSR arrays.
+  """
 
-    nodes: List[int] = list(G.nodes())
-    idx_of: Dict[int, int] = {u: i for i, u in enumerate(nodes)}
+  nodes: List[int] = list(G.nodes())
+  idx_of: Dict[int, int] = {u: i for i, u in enumerate(nodes)}
 
-    indptr: List[int] = [0]
-    indices: List[int] = []
-    probs: List[float] = []
+  indptr: List[int] = [0]
+  indices: List[int] = []
+  probs: List[float] = []
 
-    for u in nodes:
-        for v in G.neighbors(u):
-            indices.append(idx_of[v])
-            probs.append(G.edges[u, v]['p'])
-        indptr.append(len(indices))
+  for u in nodes:
+    for v in G.neighbors(u):
+      indices.append(idx_of[v])
+      probs.append(G.edges[u, v]['p'])
+    indptr.append(len(indices))
 
-    return (
+  return (
     nodes,
     idx_of,
     np.asarray(indptr, dtype=np.int32),
@@ -160,62 +165,66 @@ def _bfs_component_size(
     indices: np.ndarray,
     probs: np.ndarray,
     deleted: np.ndarray
-    ) -> int:
-    """Return 1 random realisation (stack BFS)."""
-    n = deleted.size
-    stack = np.empty(n, dtype=np.int32)
-    visited = np.zeros(n, dtype=np.uint8)
+  ) -> int:
+  """
+    Return 1 random realisation (stack BFS).
+  """
+  n = deleted.size
+  stack = np.empty(n, dtype=np.int32)
+  visited = np.zeros(n, dtype=np.uint8)
 
-    size = 1
-    top = 0
-    stack[top] = start
-    top += 1
-    visited[start] = 1
+  size = 1
+  top = 0
+  stack[top] = start
+  top += 1
+  visited[start] = 1
 
-    while top:
-        top -= 1
-        v = stack[top]
-        for eid in range(indptr[v], indptr[v + 1]):
-            w = indices[eid]
-            if deleted[w]:
-                continue
-            if np.random.random() >= probs[eid]:
-                continue
-            if visited[w]:
-                continue
-            visited[w] = 1
-            stack[top] = w
-            top += 1
-            size += 1
-    return size - 1
+  while top:
+    top -= 1
+    v = stack[top]
+    for eid in range(indptr[v], indptr[v + 1]):
+      w = indices[eid]
+      if deleted[w]:
+        continue
+      if np.random.random() >= probs[eid]:
+        continue
+      if visited[w]:
+        continue
+      visited[w] = 1
+      stack[top] = w
+      top += 1
+      size += 1
+  return size - 1
 
 @njit(parallel=True)
 def epc_mc(
-   indptr: np.ndarray,
+    indptr: np.ndarray,
     indices: np.ndarray,
     probs: np.ndarray,
     deleted: np.ndarray,
     num_samples: int
-    ) -> float:
-    """Monte‑Carlo estimator of expected pairwise connectivity (EPC)."""
+  ) -> float:
+  """
+    Monte‑Carlo estimator of expected pairwise connectivity (EPC).
+  """
 
-    surv = np.where(~deleted)[0]
-    m = surv.size
-    if m < 2:
-        return 0.0
+  surv = np.where(~deleted)[0]
+  m = surv.size
+  if m < 2:
+    return 0.0
 
-    acc = 0.0
-    for _ in prange(num_samples):
-        u = surv[np.random.randint(m)]
-        acc += _bfs_component_size(u, indptr, indices, probs, deleted)
+  acc = 0.0
+  for _ in prange(num_samples):
+    u = surv[np.random.randint(m)]
+    acc += _bfs_component_size(u, indptr, indices, probs, deleted)
 
-    return (m * acc) / (2.0 * num_samples)
+  return (m * acc) / (2.0 * num_samples)
 
 def epc_mc_deleted(
-  G: nx.Graph,
-  S: set,
-  num_samples: int = 100_000,
-) -> float:
+    G: nx.Graph,
+    S: set,
+    num_samples: int = 100_000,
+  ) -> float:
   
   nodes, idx_of, indptr, indices, probs = nx_to_csr(G)
   n = len(nodes)

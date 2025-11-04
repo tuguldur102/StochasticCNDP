@@ -11,7 +11,7 @@ def solve_lp(
   k: int
   ) -> Tuple[Dict[int, float], float]:
   """
-  Solve the LP relaxation of the REGA problem using a sparse representation.
+    Solve the LP relaxation of the REGA problem using a sparse representation.
   """
   V = list(G.nodes())
   n = len(V)
@@ -19,41 +19,40 @@ def solve_lp(
   Pairs = [tuple(sorted(e)) for e in combinations(V, 2)]
   m2    = len(Pairs)
   Nvar  = n + m2
-  s_idx = {v: i         for i, v in enumerate(V)}
-  x_idx = {e: n + j     for j, e in enumerate(Pairs)}
+  s_idx = {v: i for i, v in enumerate(V)}
+  x_idx = {e: n + j for j, e in enumerate(Pairs)}
 
   
-  rows, cols, data = [], [], []
-  rhs              = []
+  rows, cols, data, rhs = [], [], [], []
 
-  def add_coef(r, c, val):
-      rows.append(r); cols.append(c); data.append(val)
+  def _add_coeff(r, c, val):
+    rows.append(r); cols.append(c); data.append(val)
 
   r = 0 
 
   # budget 
   for i in range(n):
-      add_coef(r, i, 1.0)
+      _add_coeff(r, i, 1.0)
   rhs.append(k); r += 1
 
-  # edge upper bounds  x_uv − s_u − s_v ≤ 1 − p_uv
+  # edge upper bounds
   for (u, v) in G.edges():
       u, v   = sorted((u, v))
       puv    = G.edges[u, v]['p']
-      add_coef(r, x_idx[(u, v)],  1.0)
-      add_coef(r, s_idx[u],      -1.0)
-      add_coef(r, s_idx[v],      -1.0)
+      _add_coeff(r, x_idx[(u, v)], 1.0)
+      _add_coeff(r, s_idx[u], -1.0)
+      _add_coeff(r, s_idx[v], -1.0)
       rhs.append(1 - puv); r += 1
 
-  # triangle cuts for each real edge (i,j) and every
+  # triangle cuts for each real edge (i, j) and every
   for (i, j) in G.edges():
       i, j = sorted((i, j))
       for k_ in V:
           if k_ == i or k_ == j:
               continue
-          add_coef(r, x_idx[tuple(sorted((i, k_)))],  1.0)  
-          add_coef(r, x_idx[(i, j)]               , -1.0)  
-          add_coef(r, x_idx[tuple(sorted((j, k_)))], -1.0)   
+          _add_coeff(r, x_idx[tuple(sorted((i, k_)))], 1.0)  
+          _add_coeff(r, x_idx[(i, j)], -1.0)  
+          _add_coeff(r, x_idx[tuple(sorted((j, k_)))], -1.0)   
           rhs.append(0.0); r += 1
 
   n_rows = r
@@ -70,13 +69,11 @@ def solve_lp(
   for e in Pairs:
       c[x_idx[e]] = -1.0
 
-  # 
   res = linprog(c, A_ub=A_ub, b_ub=b_ub,
                 bounds=bounds, method="highs")
   if not res.success:
       raise RuntimeError("LP infeasible: " + res.message)
 
-  #
   s_vals = {v: res.x[s_idx[v]] for v in V}
   x_sum  = res.x[n:].sum()
   obj    = len(Pairs) - x_sum
@@ -88,7 +85,7 @@ def rega(
   num_samples: int = 100_000
   ) -> Set[int]:
   """
-  Full REGA pipeline: LP‐rounding + CSP‐refined local swaps.
+    Full REGA pipeline: LP‐rounding + CSP‐refined local swaps.
   """
 
   # iterative rounding
@@ -97,7 +94,7 @@ def rega(
 
     s_vals, _ = solve_lp(G, pre_fixed=D, k=k)
 
-    # pick the fractional s_i largest among V\D
+    # pick the fractional s_i largest among V \ D
     u = max((v for v in G.nodes() if v not in D),
             key=lambda v: s_vals[v])
     D.add(u)
