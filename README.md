@@ -1,9 +1,9 @@
-# A Maximal Independent Set Heuristic for the Stochastic Critical Node Detection Problem
+# Heuristic Algorithms for the Stochastic Critical Node Detection Problem
 
 This repository contains the source code accompanying the paper  
-**“A Maximal Independent Set Heuristic for the Stochastic Critical Node Detection Problem.”**
+**“Heuristic Algorithms for the Stochastic Critical Node Detection Problem.”**
 
-It includes implementations of the **Rounding the Expected Graph Algorithm (REGA)** and our proposed **Greedy with Maximal Independent Set (MIS)** heuristic.  
+It includes implementation of the **Rounding the Expected Graph Algorithm (REGA)** from **"Dinh T. N, and Thai. M. T (2015) Assessing attack vulnerability in networks with uncertainty. INFOCOM"** and our proposed **Greedy with Maximal Independent Set (MIS)** heuristic.  
 All experiments were conducted on **Ubuntu** using **Python 3.12**.
 
 ## Project Structure
